@@ -1,69 +1,52 @@
-import paymentsService from "@/services/payments-service";
-import ticketsService from "@/services/tickets-service";
-
-import { Response } from "express";
-import { notFoundError, badRequestError } from "@/errors";
 import { AuthenticatedRequest } from "@/middlewares";
+import paymentService from "@/services/payments-service";
+import { Response } from "express";
 import httpStatus from "http-status";
 
-export async function getPaymentsByTicketsId(req: AuthenticatedRequest, res: Response) {
+export async function getPaymentByTicketId(req: AuthenticatedRequest, res: Response) {
   try {
-    const { ticketId } = req.query;
+    const ticketId = Number(req.query.ticketId);
     const { userId } = req;
 
     if (!ticketId) {
       return res.sendStatus(httpStatus.BAD_REQUEST);
     }
-
-    const payment = await paymentsService.getPaymentsByTicketsId(Number(ticketId), Number(userId));
+    const payment = await paymentService.getPaymentByTicketId(userId, ticketId);
 
     if (!payment) {
       return res.sendStatus(httpStatus.NOT_FOUND);
     }
-
-    return res.send(payment).status(httpStatus.OK);
+    return res.status(httpStatus.OK).send(payment);
   } catch (error) {
     if (error.name === "UnauthorizedError") {
       return res.sendStatus(httpStatus.UNAUTHORIZED);
     }
-    res.sendStatus(httpStatus.NOT_FOUND);
+    return res.sendStatus(httpStatus.NOT_FOUND);
   }
 }
-export async function createPayment(req: AuthenticatedRequest, res: Response) {
+
+export async function paymentProcess(req: AuthenticatedRequest, res: Response) {
   try {
     const { userId } = req;
     const {
       ticketId,
-      cardData
+      cardData,
     } = req.body;
 
     if (!ticketId || !cardData) {
       return res.sendStatus(httpStatus.BAD_REQUEST);
     }
-
-    const payment = await paymentsService.createPayment(userId, ticketId, cardData);
+    const payment = await paymentService.paymentProcess(ticketId, userId, cardData);
 
     if (!payment) {
       return res.sendStatus(httpStatus.NOT_FOUND);
     }
 
-    const paymentResult = {
-      id: payment.id,
-      ticketId,
-      value: payment.value,
-      cardIssuer: payment.cardIssuer,
-      cardLastDigits: payment.cardLastDigits,
-      createdAt: payment.createdAt,
-      updatedAt: payment.updatedAt
-            
-    };   
-
-    return res.send(paymentResult).status(httpStatus.OK);
+    return res.status(httpStatus.OK).send(payment);
   } catch (error) {
     if (error.name === "UnauthorizedError") {
       return res.sendStatus(httpStatus.UNAUTHORIZED);
     }
-    res.sendStatus(httpStatus.NOT_FOUND);
+    return res.sendStatus(httpStatus.NOT_FOUND);
   }
 }
-
