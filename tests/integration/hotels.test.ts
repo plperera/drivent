@@ -123,13 +123,41 @@ describe("GET /hotels", () => {
       console.log(response.body);
 
       expect(response.status).toEqual(httpStatus.OK);
-      expect(response.body).toEqual({
-        id: hotel.id,
-        name: hotel.name,
-        image: hotel.image,
-        createdAt: hotel.createdAt.toISOString(),
-        updatedAt: hotel.updatedAt.toISOString(),
-      });
+      expect(response.body).toEqual(expect.arrayContaining([expect.objectContaining({
+        id: expect.any(Number),
+        name: expect.any(String),
+        image: expect.any(String),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String)
+      })]));
+    });
+    it("should respond with status 200 and with hotel data", async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const enrollment = await createEnrollmentWithAddress(user);
+      
+      const isRemote = false;
+      const includesHotel = true;
+
+      const ticketType = await createTicketTypeWithParams(isRemote, includesHotel);
+      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      const hotel = await createHotel();
+      const hotel2 = await createHotel();
+      const rooms = await createRoom(hotel.id);
+      const rooms2 = await createRoom(hotel2.id);
+
+      const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
+
+      console.log(response.body);
+
+      expect(response.status).toEqual(httpStatus.OK);
+      expect(response.body).toEqual(expect.arrayContaining([expect.objectContaining({
+        id: expect.any(Number),
+        name: expect.any(String),
+        image: expect.any(String),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String)
+      })]));
     });
   });
 });
