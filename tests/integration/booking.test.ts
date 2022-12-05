@@ -18,7 +18,7 @@ beforeEach(async () => {
 });
 
 const server = supertest(app);
-/*
+
 describe("GET /booking", () => {
   it("should respond with status 401 if no token is given", async () => {
     const response = await server.get("/booking");
@@ -45,14 +45,12 @@ describe("GET /booking", () => {
 
   describe("when token is valid", () => {
     it("should respond with status 404 when user doesnt have a booking yet", async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
 
-        const user = await createUser();
-        const token = await generateValidToken(user);
+      const response = await server.get("/booking").set("Authorization", `Bearer ${token}`);
 
-        const response = await server.get("/booking").set("Authorization", `Bearer ${token}`);
-
-        expect(response.status).toEqual(httpStatus.NOT_FOUND);
-
+      expect(response.status).toEqual(httpStatus.NOT_FOUND);
     });
 
     it("should respond with status 200 and with booking data", async () => {
@@ -61,7 +59,7 @@ describe("GET /booking", () => {
       
       const hotel = await createHotel();
       const room = await createRoom(hotel.id);
-      const booking = await createBooking(user.id, room.id)
+      const booking = await createBooking(user.id, room.id);
 
       const response = await server.get("/booking").set("Authorization", `Bearer ${token}`);
 
@@ -69,18 +67,18 @@ describe("GET /booking", () => {
       expect(response.body).toEqual({
         id: booking.id,
         Room: {
-            id: room.id,
-            name: room.name,
-            capacity: room.capacity,
-            hotelId: room.hotelId,
-            createdAt: room.createdAt.toISOString(),
-            updatedAt: room.updatedAt.toISOString()
+          id: room.id,
+          name: room.name,
+          capacity: room.capacity,
+          hotelId: room.hotelId,
+          createdAt: room.createdAt.toISOString(),
+          updatedAt: room.updatedAt.toISOString()
         }
       });
     });
   });
 });
-*/
+
 describe("POST /booking", () => {
   it("should respond with status 401 if no token is given", async () => {
     const response = await server.post("/booking");
