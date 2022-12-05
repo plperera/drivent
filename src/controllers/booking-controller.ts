@@ -55,8 +55,12 @@ export async function postBooking(req: AuthenticatedRequest, res: Response) {
 
 export async function putBooking(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
-  const { roomId } = req.body; 
   const bookingId = Number(req.params.bookingId);
+  const roomId = req.body.roomId as number;
+
+  if (!roomId || roomId * 0 !== 0) {
+    res.sendStatus(httpStatus.BAD_REQUEST);
+  }
 
   try {
     const newBooking = await bookingService.putBooking(userId, bookingId, roomId);
