@@ -17,6 +17,12 @@ async function getBooking(userId: number) {
 }
 
 async function postBooking(userId: number, roomId: number) {
+  const hasBooking = await bookingRepository.findBookingByUserId(userId);
+
+  if (hasBooking) {
+    throw forbiddenError();
+  }
+  
   const room = await bookingRepository.findRoomById(roomId);
 
   if (!room) {
@@ -32,9 +38,13 @@ async function postBooking(userId: number, roomId: number) {
 }
 
 async function putBooking(userId: number, bookingId: number, roomId: number) {
-  const verifyBooking = await getBooking(userId);
+  const booking = await bookingRepository.findBookingByUserId(userId);
 
-  if ( verifyBooking.id !== bookingId ) {
+  if (!booking) {
+    throw forbiddenError();
+  }
+  
+  if ( booking.id !== bookingId ) {
     throw unauthorizedError();
   }
 

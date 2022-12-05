@@ -32,6 +32,10 @@ export async function postBooking(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
   const roomId = req.body.roomId as number;
 
+  if (!roomId || roomId * 0 !== 0) {
+    res.sendStatus(httpStatus.BAD_REQUEST);
+  }
+
   try {
     const booking = await bookingService.postBooking(userId, roomId);
     return res.status(httpStatus.OK).send({ bookingId: booking.id });
@@ -50,11 +54,15 @@ export async function postBooking(req: AuthenticatedRequest, res: Response) {
 }
 
 export async function putBooking(req: AuthenticatedRequest, res: Response) {
-  try {
-    const { userId } = req;
-    const roomId = req.body.roomId as number;
-    const bookingId = Number(req.params.bookingId);
+  const { userId } = req;
+  const bookingId = Number(req.params.bookingId);
+  const roomId = req.body.roomId as number;
 
+  if (!roomId || roomId * 0 !== 0) {
+    res.sendStatus(httpStatus.BAD_REQUEST);
+  }
+
+  try {
     const newBooking = await bookingService.putBooking(userId, bookingId, roomId);
     
     return res.status(httpStatus.OK).send({ bookingId: newBooking.id });
