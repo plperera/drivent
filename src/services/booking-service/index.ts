@@ -17,6 +17,12 @@ async function getBooking(userId: number) {
 }
 
 async function postBooking(userId: number, roomId: number) {
+  const hasBooking = await bookingRepository.findBookingByUserId(userId);
+
+  if (hasBooking) {
+    throw forbiddenError();
+  }
+  
   const room = await bookingRepository.findRoomById(roomId);
 
   if (!room) {
